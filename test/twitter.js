@@ -32,14 +32,34 @@ describe('twitter', function () {
     beforeEach(function () {
       nock('https://stream.twitter.com')
                   .post('/1.1/statuses/filter.json', {
-                    track: 'tacos'
+                    track: 'tacos',
+                    follow:''
                   })
                   .replyWithFile(200, __dirname + '/tacos.json')
 
       nock('https://stream.twitter.com')
                   .post('/1.1/statuses/filter.json', {
                     // track: 'tacos%2Ctortas'
-                    track: 'tacos,tortas'
+                    track: 'tacos,tortas',
+                    follow:''
+                  })
+                  .replyWithFile(200, __dirname + '/tacos.json')
+
+
+      nock('https://stream.twitter.com')
+                  .post('/1.1/statuses/filter.json', {
+                    // track: 'tacos%2Ctortas'
+                    track: '',
+                    follow:'@tacos'
+                  })
+                  .replyWithFile(200, __dirname + '/tacos.json')
+
+
+      nock('https://stream.twitter.com')
+                  .post('/1.1/statuses/filter.json', {
+                    // track: 'tacos%2Ctortas'
+                    track: 'tacos',
+                    follow:'@tacos'
                   })
                   .replyWithFile(200, __dirname + '/tacos.json')
     })
@@ -54,7 +74,7 @@ describe('twitter', function () {
       assert(!called)
     })
 
-    it('emits tweets', function (done) {
+    it('tracks & emits tweets', function (done) {
       twitter.on('tweet', function (tweet) {
         assert.equal(tweet.text, 'Taco')
         done()
@@ -63,6 +83,17 @@ describe('twitter', function () {
       assert(!twitter.stream)
       twitter.track('tacos')
       assert.deepEqual(twitter.tracking(), ['tacos'])
+    })
+
+    it('follows & emits tweets', function (done) {
+      twitter.on('tweet', function (tweet) {
+        assert.equal(tweet.text, 'Taco')
+        done()
+      })
+
+      assert(!twitter.stream)
+      twitter.follow('@tacos')
+      assert.deepEqual(twitter.following(), ['@tacos'])
     })
 
     it('tracks dups of same keyword', function () {
